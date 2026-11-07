@@ -19,6 +19,7 @@
   --space-4: 2rem;
   --space-5: 3rem;
   --radius: 0.75rem;
+  --header-offset: 7rem;
   line-height: 1.65;
 }
 
@@ -80,7 +81,7 @@ li+li {
 
 section,
 main {
-  scroll-margin-top: var(--space-3);
+  scroll-margin-top: var(--header-offset);
 }
 
 .site-header,
@@ -89,6 +90,10 @@ main {
 }
 
 .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f8f9f6;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -119,7 +124,7 @@ main {
 
 .sidebar {
   position: sticky;
-  top: var(--space-3);
+  top: var(--header-offset);
   align-self: start;
 }
 
@@ -265,6 +270,45 @@ code {
   margin-bottom: 0;
 }
 
+#carrito-productos>.card {
+  margin-top: var(--space-3);
+}
+
+/* La lista de productos necesita el ancho completo para sus detalles. */
+#crud-productos .example-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+#crud-productos .table-scroll {
+  overflow-x: auto;
+}
+
+#crud-productos table {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  font: inherit;
+}
+
+#crud-productos caption {
+  text-align: left;
+  padding-bottom: var(--space-1);
+}
+
+#crud-productos th,
+#crud-productos td {
+  padding: var(--space-1);
+  border-bottom: 1px solid var(--color-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+#crud-productos th,
+#crud-productos td:nth-child(2),
+#crud-productos td:nth-child(3) {
+  white-space: nowrap;
+}
+
 /* Formularios */
 form {
   display: grid;
@@ -389,7 +433,7 @@ form .button {
   top: -100px;
   padding: var(--space-2);
   background: white;
-  z-index: 1;
+  z-index: 2;
 }
 
 .skip-link:focus {
