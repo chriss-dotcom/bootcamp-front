@@ -26,6 +26,8 @@ export function Sidebar() {
 
                 <NavLink className="chapter-link" to="/servicios-web">04 - useEffect y Fetch (Servicios Web)</NavLink>
 
+                <NavLink className="chapter-link" to="/estados-globales">05 - Estados Globales (Zustand)</NavLink>
+
                 {/* Sin end, Cursos también queda activo al visitar /cursos/react. */}
                 <NavLink className="chapter-link" to="/cursos">Cursos</NavLink>
             </nav>
