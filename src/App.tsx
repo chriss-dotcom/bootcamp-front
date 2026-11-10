@@ -8,6 +8,7 @@ import { Inicio } from './sesiones/02-react-router/paginas/Inicio'
 import { DetalleCurso } from './sesiones/01-componentes/ejercicio/DetalleCurso'
 import { SesionEstadosForms } from './sesiones/03-estados-forms/SesionEstadosFroms.tsx'
 import { SesionServiciosWeb } from './sesiones/04-ServiciosWeb/SesionServiciosWeb.tsx'
+import { SesionEstadosGlobales } from './sesiones/05-EstadosGlobales/SesionEstadosGlobales.tsx'
 
 export function App() {
   return (
@@ -20,6 +21,7 @@ export function App() {
           <Route path="/cursos" element={<Cursos />} />
           <Route path="/estados-forms" element={<SesionEstadosForms />} />
           <Route path="/servicios-web" element={<SesionServiciosWeb />} />
+          <Route path="/estados-globales" element={<SesionEstadosGlobales />} />
           <Route path="/cursos/:cursoId" element={<DetalleCurso />} />
           <Route path="*" element={<PaginaNoEncontrada />} />
         </Route>

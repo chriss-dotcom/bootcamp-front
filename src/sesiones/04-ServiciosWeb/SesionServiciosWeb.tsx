@@ -8,6 +8,7 @@ import { EjemploPromiseAll } from "./ejemplos/07-PromiseAll";
 import { EjemploPokeApi } from "./ejemplos/08-PokeApi";
 import { EjemploCrudProductos } from "./ejemplos/09-CrudProductos";
 import { Ejercicio } from "./ejercicio/Ejercicio";
+import { Resolucion } from "./ejercicio/Resolucion";
 
 export function SesionServiciosWeb() {
     return (
@@ -44,6 +45,7 @@ export function SesionServiciosWeb() {
             <EjemploPokeApi />
             <EjemploCrudProductos />
             <Ejercicio />
+            <Resolucion />
         </>
     )
 }
