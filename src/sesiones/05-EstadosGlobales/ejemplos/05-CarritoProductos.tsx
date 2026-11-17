@@ -4,12 +4,18 @@ import { useCarritoStore } from "../stores/useCarritoStore";
 
 const URL_PRODUCTOS = 'http://localhost:3001/productos'
 
-const esquemaCatalogo = z.array(z.object({
-    id: z.string().min(1),
-    nombre: z.string().min(1),
-    precio: z.number().nonnegative(),
-    disponible: z.boolean()
-}))
+const esquemaCatalogo = z.array(
+    z.object({
+        id: z.coerce.string().min(1),
+        nombre: z.string().min(1),
+        precio: z.coerce.number().nonnegative(),
+        cantidad: z.number().nonnegative()
+    }).transform(({cantidad, ...producto }) => ({
+        ...producto,
+        stock: cantidad,
+        disponible: cantidad > 0
+    }))
+)
 
 type ProductoCatalogo = z.infer<typeof esquemaCatalogo>[number]
 
@@ -47,6 +53,7 @@ export function EjemploCarritoProductos() {
 
 
                 if (!validacion.success) {
+                    console.error(validacion.error.issues)
                     throw new Error(`La API devolvio un catalogo de productos invalido`)
                 }
 
@@ -76,21 +83,29 @@ export function EjemploCarritoProductos() {
         return () => controlador.abort();
     }, [])
 
+    //console.table(productos.map((p) => ({ nombre: p.nombre, stock: p.stock, disponible: p.disponible })))
+
     return (
         <section className="lesson" id="carrito-productos">
 
             <h3>Catalogo</h3>
             {cargando ? <p role="status">Cargando catalogo...</p> : error ? <p role="status">{error}</p> : productos.length === 0 ? <p>No hay productos disponibles</p> : (
                 <div className="example-grid">
-                    {productos.map((producto) => (
+                    {productos.map((producto) => {
+                         const enCarrito = items.find((item) => item.producto.id === producto.id)?.cantidad ?? 0
+                         const restantes = producto.stock - enCarrito
+                         const sinStock = restantes <= 0
+
+                    return (
                         <article key={producto.id} className="card">
                             <img className="producto-imagen" src={`https://placehold.co/480x300/eaf2ec/21634?text=${encodeURIComponent(producto.nombre)}`} alt="" />
                             <h4>{producto.nombre}</h4>
                             <p>Precio: ${producto.precio}</p>
-                            <p>{producto.disponible ? 'Disponible' : 'No Disponible'}</p>
-                            <button className="button" type="button" disabled={!producto.disponible} onClick={() => agregar(producto)}>Agregar al carrito</button>
+                            <p>{sinStock ? 'No Disponible' : `Disponible (quedan: ${restantes} Unidad)`}</p>
+                            <button className="button" type="button" disabled={sinStock} onClick={() => agregar(producto)}>Agregar al carrito</button>
                         </article>
-                    ))}
+                    )
+                    })}
                 </div>
             )}
 
@@ -106,9 +121,9 @@ export function EjemploCarritoProductos() {
                                 </div>
                                 <div className="carrito-controles">
                                     <button className="button" type="button" onClick={() => quitar(item.producto.id)}>-</button>
-                                    <button className="button" type="button" onClick={() => agregar(item.producto)}>+</button>
+                                    <button className="button" type="button" disabled={item.cantidad >= item.producto.stock} onClick={() => agregar(item.producto)}>+</button>
                                     <button className="button" type="button" onClick={() => eliminar(item.producto.id)}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-trash">
                                             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                             <path d="M4 7l16 0" />
                                             <path d="M10 11l0 6" />
