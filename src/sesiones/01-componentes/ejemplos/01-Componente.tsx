@@ -2,7 +2,7 @@ function TarjetaAlumnoEstatica() {
     let nombre = 'Ana'
     return (
         <article>
-            {/* aca un comenario*/}
+            {/* Con las llaves mostramos el valor de la variable nombre. Prueba cambiar "Ana" arriba y mira qué aparece en el título.*/}
             <h3>{nombre}</h3>
             <p>Estudiante de React</p>
         </article>

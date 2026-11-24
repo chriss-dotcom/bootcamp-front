@@ -5,8 +5,7 @@ export function SinDependencias() {
     const [contador, setContador] = useState(0)
     const [curso, setCurso] = useState("React")
 
-    // un useEffect sin segundo parametro ( useEffect( ()=>{} ) ), significa que lo que esta en la funcion del 
-    // primer parametro se ejecutara cada vez que el componente se actualice.
+    // Sin segundo argumento, veremos este mensaje al montar el ejemplo y después de cada render que React aplique. Prueba cambiar el curso.
     useEffect(() => {
         console.log("El efecto (useEffect) sin ninguna dependencia, se ejecuto", { contador, curso })
     })

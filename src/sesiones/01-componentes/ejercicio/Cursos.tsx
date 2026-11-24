@@ -14,7 +14,7 @@ function FichaCurso({ id, titulo, horario, sala = "Sala por confirmar", tieneCup
             <p>
                 <a href={`/cursos/${id}`}>Ver detalle de {titulo} (a)</a>
             </p>
-            {/* /detalle/:cursoId */}
+            {/* Prueba ambos enlaces: Link conserva la app en memoria y el enlace HTML vuelve a cargar el documento. */}
 
         </article>
 

@@ -1,6 +1,6 @@
 # Bootcamp de React
 
-Proyecto de apoyo para las clases de React. Reúne explicaciones, ejemplos interactivos y ejercicios para avanzar desde componentes y props hasta formularios y consumo de servicios web.
+Proyecto de apoyo para las clases de React. Reúne explicaciones, ejemplos interactivos y ejercicios para avanzar desde componentes y props hasta el consumo de servicios web, el estado global y la autenticación.
 
 La aplicación usa React 19, TypeScript 6 y Vite 8. La navegación se implementa con React Router 8, la validación de formularios con Zod 4 y la API local de práctica con JSON Server `1.0.0-beta.15`.
 
@@ -9,7 +9,7 @@ La aplicación usa React 19, TypeScript 6 y Vite 8. La navegación se implementa
 - Node.js compatible con Vite 8: `^20.19.0 || >=22.12.0`.
 - pnpm, utilizado por los scripts y el archivo `pnpm-lock.yaml` del proyecto.
 
-Ejecuta los comandos desde la raíz del repositorio:
+Ejecuta los comandos desde la raíz de `bootcamp-react`:
 
 ```bash
 pnpm install
@@ -49,8 +49,10 @@ La compilación del frontend no inicia ni incluye la API de JSON Server; el CRUD
 | `/cursos` y `/cursos/:cursoId` | Listado y detalle de cursos usados en los ejercicios. |
 | `/estados-forms` | Estado con `useState`, controles de formulario y validación con Zod. |
 | `/servicios-web` | `useEffect`, dependencias, limpieza, promesas, asincronía, `Promise.all`, PokéAPI y CRUD de productos. |
+| `/estados-globales` | Estado compartido con Zustand, selectores, persistencia, carrito y ejercicio de tablero. |
+| `/autenticacion-autorizacion` | Inicio de sesión, cookies, cabecera Bearer, roles y contenido protegido. |
 
-Cada sesión agrupa sus ejemplos y su ejercicio. La sesión de servicios web termina con un reto de préstamos de biblioteca; su archivo `Resolucion.tsx` contiene el espacio para implementar la solución.
+Para abrir Servicios Web, inicia sesión en Autenticación y autorización con la cuenta de prueba de rol administrador indicada en el ejemplo. Vite reenvía las peticiones de autenticación a DummyJSON. La sesión de servicios web termina con un reto de préstamos de biblioteca; su archivo `Resolucion.tsx` contiene el espacio para implementar la solución.
 
 ## Estructura del proyecto
 
@@ -69,7 +71,9 @@ bootcamp-react/
 │       ├── 01-componentes/
 │       ├── 02-react-router/
 │       ├── 03-estados-forms/
-│       └── 04-ServiciosWeb/
+│       ├── 04-ServiciosWeb/
+│       ├── 05-EstadosGlobales/
+│       └── 06-AutenticacionAutorizacion/
 ├── index.html                    # Documento HTML de entrada
 ├── package.json                  # Dependencias y scripts
 ├── pnpm-lock.yaml                # Versiones resueltas de dependencias
@@ -174,8 +178,7 @@ Así se pueden consultar `http://localhost:3002/libros` y `http://localhost:3002
 
 ## Notas para trabajar en clase
 
-- Algunos textos de los ejemplos todavía mencionan `npm run api` y la carpeta `clase-estados-forms`. En este repositorio usa la raíz actual y `pnpm run jserver`; no existe un script `api` en `package.json`.
-- La explicación de edición del CRUD menciona PATCH, pero su implementación actual utiliza PUT con todos los campos. El reto de biblioteca sí pide PATCH.
+- El CRUD de productos envía todos los campos con PUT. En el reto de biblioteca se practica la actualización parcial con PATCH.
 - Si falla la carga de productos, comprueba que exista `data/productos.json`, que sea JSON válido y que la API responda en el puerto `3001`.
 - Para comprobar una práctica, revisa la pestaña Network del navegador y recarga después de guardar: permite relacionar métodos HTTP, respuestas y persistencia en el archivo.
 

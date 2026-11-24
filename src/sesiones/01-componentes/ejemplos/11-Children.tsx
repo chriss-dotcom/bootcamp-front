@@ -25,7 +25,7 @@ export function EjemploComponentesChildren() {
             <div className="example-grid">
 
                 <TarjetaContenido titulo="Nuestra clase" >
-                    <p>Vamos a crear un componente pequeño con un paragraph como children</p>
+                    <p>Escribe un párrafo entre las etiquetas de <code>TarjetaContenido</code>. El componente lo recibe en <code>children</code>.</p>
                 </TarjetaContenido>
 
                 <TarjetaContenido titulo="Antes de continuar" >

@@ -44,7 +44,7 @@ function Ejercicio() {
                 <li>HTML y CSS dice “Completo” y no tiene botón.</li>
                 <li>Si cambias un horario en el código, el nuevo horario aparece en el componente y en su alerta.</li>
             </ul>
-            <p><strong>Extra opcional:</strong> Genera los cursos desde un arreglo y usa key map. No es necesario para completar el ejercicio principal.</p>
+            <p><strong>Extra opcional:</strong> Recorre el arreglo con <code>map</code> y usa el <code>id</code> de cada curso como <code>key</code>. No es necesario para completar el ejercicio principal.</p>
 
             <h3>Pistas · ábrelas solo si te atascas</h3>
             <details>

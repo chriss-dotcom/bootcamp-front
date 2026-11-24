@@ -7,7 +7,7 @@ export function Ejercicio() {
       <p>Implementa tu solución en <code>04-ServiciosWeb/<wbr />ejercicio/<wbr />Resolucion.tsx</code>. Usa como referencia los ejemplos de efectos, promesas, <code>Promise.all</code> y CRUD de productos.</p>
 
       <h3>Paso 1 · Prepara la API</h3>
-      <p>Desde la carpeta <code>clase-estados-forms</code>, crea <code>data/biblioteca.json</code> con estos datos. Usa un archivo distinto al de productos para conservar el ejemplo de la sesión.</p>
+      <p>Desde la raíz de <code>bootcamp-react</code>, crea <code>data/biblioteca.json</code> con estos datos. Usa un archivo distinto al de productos para conservar el ejemplo de la sesión.</p>
       <pre><code>{JSON.stringify({
         libros: [
           { id: '1', titulo: 'Papelucho', autor: 'Marcela Paz' },

@@ -42,22 +42,24 @@ const formularioInicial: Formulario = {
 const esquemaFormulario = z.object({
     nombre: z.string().trim().min(1, { error: 'Ingresa el nombre del producto' }),
     descripcion: z.string(),
-    fechaIngreso: z.iso.date({ error: 'Ingresa una fecha valida' }),
-    etiquetas: z.array(z.enum(["Oferta", "Escolar", "Oficina"]), { error: 'Seleccione una etiquetas' }),
-    categoria: z.string().trim().min(1, { error: 'Seleccione una categoria' }),
+    // El input de fecha entrega un texto como "2026-11-19". Zod comprueba la fecha y podemos enviar ese mismo texto a la API.
+    fechaIngreso: z.iso.date({ error: 'Ingresa una fecha válida' }),
+    etiquetas: z.array(z.enum(["Oferta", "Escolar", "Oficina"]), { error: 'Selecciona etiquetas válidas' }),
+    categoria: z.string().trim().min(1, { error: 'Selecciona una categoría' }),
     disponible: z.boolean(),
-    condicion: z.enum(["Nuevo", "Usado", "Reacondicionado"], { error: 'Seleccione una condicion' }),
+    condicion: z.enum(["Nuevo", "Usado", "Reacondicionado"], { error: 'Selecciona una condición' }),
+    // Aunque el input sea de tipo number, su value llega como texto. Primero rechazamos el vacío, porque Number("") daría 0.
     precio: z.string().trim().min(1, { error: 'Ingresa el precio' })
         .transform(Number)
         .pipe(
-            z.number({ error: 'Ingresa una cantidad valida' })
-                .nonnegative({ error: 'La cantidad debe ser mayor o igual a cero' })
+            z.number({ error: 'Ingresa un precio válido' })
+                .nonnegative({ error: 'El precio debe ser mayor o igual a cero' })
         ),
-    cantidad: z.string().trim().min(1, { error: 'Ingresa el precio' })
+    cantidad: z.string().trim().min(1, { error: 'Ingresa la cantidad' })
         .transform(Number)
         .pipe(
-            z.number({ error: 'Ingresa una cantidad valida' })
-                .int({ error: 'La cantidad debe ser un numero valido' })
+            z.number({ error: 'Ingresa una cantidad válida' })
+                .int({ error: 'La cantidad debe ser un número entero' })
                 .nonnegative({ error: 'La cantidad debe ser mayor o igual a cero' })
         ),
 })
@@ -68,8 +70,9 @@ export function EjemploCrudProductos() {
     const [productos, setProductos] = useState<Producto[]>([])
     const [categorias, setCategorias] = useState<Categoria[]>([])
 
+    // Usamos el mismo formulario para dos acciones: con null creamos un producto y con un id guardamos los cambios de ese producto.
     const [idEnEdicion, setIdEnEdicion] = useState<string | null>(null)
-    const [resultadoValidacion, setResultadoValidacion] = useState<ReturnType<typeof esquemaFormulario.safeParse> | null>();
+    const [resultadoValidacion, setResultadoValidacion] = useState<ReturnType<typeof esquemaFormulario.safeParse> | null>(null);
     const [cargando, setCargando] = useState(false);
     const [mensaje, setMensaje] = useState('')
     const [error, setError] = useState('');
@@ -82,61 +85,30 @@ export function EjemploCrudProductos() {
 
         const controlador = new AbortController()
 
-        async function cargarProductos() {
+        async function cargarDatos() {
+            setCargando(true)
             try {
-
-                setCargando(true)
-                const response = await fetch(URL_PRODUCTOS, {
-                    method: 'GET',
-                    signal: controlador.signal,
-                    headers: { 'Content-type': 'application/json' }
-                })
-
-                if (!response.ok) { throw new Error(`Error HTTP: ${response.status}`) }
-
-                const datos: Producto[] = await response.json()
-                setProductos(datos)
-
-            } catch (errorPeticion) {
-
-                if (controlador.signal.aborted) { return }
-
-                console.log('Error en solicitud http', errorPeticion)
-                setError('No fue posible cargar los productos. Inicia la API con npm run api y recarga la página.')
+                // Podemos pedir ambos recursos a la vez: para iniciar la consulta de categorías no necesitamos la respuesta de productos.
+                const [respuestaProductos, respuestaCategorias] = await Promise.all([
+                    fetch(URL_PRODUCTOS, { signal: controlador.signal }),
+                    fetch(URL_PRODUCTOS_CATEGORIAS, { signal: controlador.signal })
+                ])
+                if (!respuestaProductos.ok || !respuestaCategorias.ok) throw new Error('Falló la carga del catálogo')
+                const productos: Producto[] = await respuestaProductos.json()
+                const categorias: Categoria[] = await respuestaCategorias.json()
+                if (controlador.signal.aborted) return
+                setProductos(productos)
+                setCategorias(categorias)
+            } catch {
+                if (!controlador.signal.aborted) {
+                    setError('No fue posible cargar los productos y sus categorías. Inicia la API con pnpm run jserver y recarga la página.')
+                }
             } finally {
-                setCargando(false);
+                if (!controlador.signal.aborted) setCargando(false)
             }
-
         }
 
-        async function cargarCategorias() {
-            try {
-
-                setCargando(true)
-                const response = await fetch(URL_PRODUCTOS_CATEGORIAS, {
-                    method: 'GET',
-                    signal: controlador.signal,
-                    headers: { 'Content-type': 'application/json' }
-                })
-
-                if (!response.ok) { throw new Error(`Error HTTP: ${response.status}`) }
-
-                const datos: Categoria[] = await response.json()
-                setCategorias(datos)
-
-            } catch (errorPeticion) {
-
-                if (controlador.signal.aborted) { return }
-
-                console.log('Error en solicitud http', errorPeticion)
-                setError('No fue posible cargar los productos. Inicia la API con npm run api y recarga la página.')
-            } finally {
-                setCargando(false);
-            }
-
-        }
-        cargarCategorias();
-        cargarProductos();
+        void cargarDatos()
         return () => controlador.abort();
     }, [])
 
@@ -159,6 +131,7 @@ export function EjemploCrudProductos() {
             const respuesta = await fetch(`${url}`, {
                 method: idEnEdicion === null ? 'POST' : 'PUT',
                 headers: { 'Content-Type': 'application/json' },
+                // Enviamos data porque ya tiene precio y cantidad como números. En el objeto formulario todavía son textos.
                 body: JSON.stringify(validacion.data)
             })
 
@@ -196,7 +169,6 @@ export function EjemploCrudProductos() {
 
     async function eliminarProducto(id: string) {
 
-        if (idEnEdicion === id) { limpiarFormulario() }
 
         setError('')
         setMensaje('')
@@ -213,6 +185,7 @@ export function EjemploCrudProductos() {
 
 
 
+            if (idEnEdicion === id) limpiarFormulario()
             setProductos((productosActuales) => productosActuales.filter((producto) => producto.id !== id));
             setMensaje(`El producto con id ${id} fue eliminado`)
 
@@ -263,18 +236,18 @@ export function EjemploCrudProductos() {
 
             <p>Retomamos los formularios controlados y las listas. El formulario y la tabla comparten el estado del mismo componente: al guardar un producto, React vuelve a mostrar la lista actualizada.</p>
             <p>CRUD significa crear, leer, actualizar y eliminar. JSON Server expone una API REST a partir de <code>data/productos.json</code> y guarda allí los cambios. El estado de React conserva la lista que mostramos en pantalla.</p>
-            <p>Desde la carpeta <code>clase-estados-forms</code>, inicia la API con <code>npm run api</code> y, en otra terminal, la aplicación con <code>npm run dev</code>. El recurso está en <code>http://localhost:3001/productos</code>.</p>
-            <pre><code>{"GET    /productos      → consultar la lista\nPOST   /productos      → crear un producto\nPATCH  /productos/:id  → actualizar un producto\nDELETE /productos/:id  → eliminar un producto"}</code></pre>
+            <p>Desde la raíz de <code>bootcamp-react</code>, inicia la API con <code>pnpm run jserver</code> y, en otra terminal, la aplicación con <code>pnpm run dev</code>. El recurso está en <code>http://localhost:3001/productos</code>.</p>
+            <pre><code>{"GET    /productos      → consultar la lista\nPOST   /productos      → crear un producto\nPUT    /productos/:id  → actualizar un producto\nDELETE /productos/:id  → eliminar un producto"}</code></pre>
 
             <h3>1. Guardar los datos del formulario</h3>
             <p>Todos los campos se agrupan en un solo estado: <code>formulario</code>. Cada <code>onChange</code> crea una copia con <code>...formulario</code> y actualiza el campo correspondiente, conservando los demás. Los controles usan <code>value</code> o <code>checked</code> para leer su valor. Aunque el input sea de tipo <code>number</code>, su <code>value</code> es un texto; Zod comprueba que no esté vacío, lo convierte con <code>transform(Number)</code> y valida el número con <code>pipe</code>. El precio no puede ser negativo y la cantidad debe ser un entero mayor o igual a cero.</p>
             <pre><code>{"type Formulario = {\n  nombre: string\n  precio: string\n  cantidad: string\n  categoria: string\n  disponible: boolean\n  condicion: string\n  descripcion: string\n  fechaIngreso: string\n  etiquetas: string[]\n}\n\nconst formularioInicial: Formulario = {\n  nombre: '',\n  precio: '',\n  cantidad: '',\n  categoria: '',\n  disponible: true,\n  condicion: 'Nuevo',\n  descripcion: '',\n  fechaIngreso: '',\n  etiquetas: [],\n}\n\nconst [formulario, setFormulario] = useState(formularioInicial)\nconst [idEnEdicion, setIdEnEdicion] = useState<string | null>(null)"}</code></pre>
 
             <p>Como en la sesión de formularios, <code>safeParse</code> valida todos los campos sin lanzar una excepción. Guardamos el resultado en el estado y usamos <code>z.flattenError(resultadoValidacion.error).fieldErrors</code> para agrupar los mensajes por campo. Si falla, mostramos cada error junto a su control y no enviamos la petición. Los errores se actualizan al volver a enviar y se limpian al cancelar o editar otro producto. Si tiene éxito, <code>validacion.data</code> contiene el nombre sin espacios en los extremos y los valores numéricos. Usamos <code>noValidate</code> para que los mensajes provengan de Zod.</p>
-            <pre><code>{"const [resultadoValidacion, setResultadoValidacion] = useState<ReturnType<typeof esquemaProducto.safeParse> | null>(null)\n\nconst erroresValidacion = resultadoValidacion && !resultadoValidacion.success\n  ? z.flattenError(resultadoValidacion.error).fieldErrors\n  : {}\n\nconst validacion = esquemaProducto.safeParse(formulario)\nsetResultadoValidacion(validacion)\n\nif (!validacion.success) {\n  return\n}\n\n// Solo enviamos los datos validados y transformados.\nbody: JSON.stringify(validacion.data)"}</code></pre>
+            <pre><code>{"const [resultadoValidacion, setResultadoValidacion] = useState<ReturnType<typeof esquemaFormulario.safeParse> | null>(null)\n\nconst erroresValidacion = resultadoValidacion && !resultadoValidacion.success\n  ? z.flattenError(resultadoValidacion.error).fieldErrors\n  : {}\n\nconst validacion = esquemaFormulario.safeParse(formulario)\nsetResultadoValidacion(validacion)\n\nif (!validacion.success) {\n  return\n}\n\n// Solo enviamos los datos validados y transformados.\nbody: JSON.stringify(validacion.data)"}</code></pre>
 
             <p>El select usa <code>value</code> para la categoría. El checkbox usa <code>checked</code> y entrega un booleano mediante <code>evento.target.checked</code>. Los radios comparten el atributo <code>name</code> y comparan su valor con el estado de condición para permitir una sola selección. Zod valida las opciones con <code>z.enum</code> y la disponibilidad con <code>z.boolean</code>: desmarcar el checkbox también es válido.</p>
-            <pre><code>{"<select value={formulario.categoria} onChange={(evento) => setFormulario({ ...formulario, categoria: evento.target.value })}>...</select>\n\n<input type=\"checkbox\" checked={formulario.disponible}\n  onChange={(evento) => setFormulario({ ...formulario, disponible: evento.target.checked })} />\n\n<input type=\"radio\" name=\"condicion-producto\" value=\"Nuevo\"\n  checked={formulario.condicion === 'Nuevo'}\n  onChange={(evento) => setFormulario({ ...formulario, condicion: evento.target.value })} />"}</code></pre>
+            <pre><code>{"<select value={formulario.categoria} onChange={(evento) => setFormulario({ ...formulario, categoria: evento.target.value })}>...</select>\n\n<input type=\"checkbox\" checked={formulario.disponible}\n  onChange={(evento) => setFormulario({ ...formulario, disponible: evento.target.checked })} />\n\n<input type=\"radio\" name=\"condicion\" value=\"Nuevo\"\n  checked={formulario.condicion === 'Nuevo'}\n  onChange={(evento) => setFormulario({ ...formulario, condicion: evento.target.value })} />"}</code></pre>
 
             <p>La descripción usa un <code>textarea</code> y conserva el texto con sus saltos de línea. La fecha usa <code>type="date"</code>: su valor se envía como texto <code>YYYY-MM-DD</code> y Zod lo comprueba con <code>z.iso.date</code>. No necesitamos convertirla a un objeto <code>Date</code>.</p>
             <p>El select de etiquetas usa <code>multiple</code>. Su <code>value</code> es un arreglo de textos, y <code>selectedOptions</code> contiene todas las opciones seleccionadas. Con <code>Array.from</code> obtenemos sus valores. En JSON se guarda un arreglo como <code>["Oferta", "Escolar"]</code>; sin selección enviamos <code>[]</code>. La descripción vacía y el arreglo vacío también son válidos.</p>
@@ -285,8 +258,8 @@ export function EjemploCrudProductos() {
             <pre><code>{"const respuesta = await fetch(URL_PRODUCTOS, {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify(validacion.data),\n})\n\nif (!respuesta.ok) {\n  throw new Error(`Error HTTP: ${respuesta.status}`)\n}\n\nconst productoGuardado = await respuesta.json()\nsetProductos((productosActuales) => [\n  ...productosActuales,\n  productoGuardado,\n])"}</code></pre>
 
             <h3>3. Editar usando el mismo formulario</h3>
-            <p>Editar copia los datos al formulario y guarda su identificador en <code>idEnEdicion</code>. Si vale <code>null</code>, enviamos POST; si tiene un identificador, enviamos PATCH a ese producto. Con <code>map</code> reemplazamos solamente el producto que la API actualizó. Cancelar limpia el formulario sin enviar una petición.</p>
-            <pre><code>{"const url = idEnEdicion === null\n  ? URL_PRODUCTOS\n  : `${URL_PRODUCTOS}/${idEnEdicion}`\n\n// El cuerpo JSON contiene todos los campos validados en ambos casos.\nmethod: idEnEdicion === null ? 'POST' : 'PATCH'\n\n// Tras recibir el producto actualizado:\nsetProductos((productosActuales) => productosActuales.map((producto) => (\n  producto.id === idEnEdicion ? productoGuardado : producto\n)))"}</code></pre>
+            <p>Editar copia los datos al formulario y guarda su identificador en <code>idEnEdicion</code>. Si vale <code>null</code>, enviamos POST; si tiene un identificador, enviamos todos los campos con PUT a la URL de ese producto. Con <code>map</code> reemplazamos solamente el producto que la API actualizó. Cancelar limpia el formulario sin enviar una petición.</p>
+            <pre><code>{"const url = idEnEdicion === null\n  ? URL_PRODUCTOS\n  : `${URL_PRODUCTOS}/${idEnEdicion}`\n\n// El cuerpo JSON contiene todos los campos validados en ambos casos.\nmethod: idEnEdicion === null ? 'POST' : 'PUT'\n\n// Tras recibir el producto actualizado:\nsetProductos((productosActuales) => productosActuales.map((producto) => (\n  producto.id === idEnEdicion ? productoGuardado : producto\n)))"}</code></pre>
 
             <h3>4. Eliminar y manejar errores</h3>
             <p>DELETE usa el id en la URL. Cuando la API confirma la eliminación, <code>filter</code> construye la lista sin ese producto. Si falla una petición, mostramos un error y conservamos los datos para intentarlo de nuevo. Las escrituras ocurren en los eventos, no en <code>useEffect</code>.</p>
@@ -333,15 +306,17 @@ export function EjemploCrudProductos() {
                         </label>
                         {erroresValidacion.disponible ? <span role="alert"><br />{erroresValidacion.disponible.join(' ')}</span> : null}
                     </p>
-                    <p>
-                        <fieldset disabled={cargando}>
-                            <legend>Condicion del producto</legend>
-                            <label><input type="radio" name="condicion" value="Nuevo" /> Nuevo</label>
-                            <label><input type="radio" name="condicion" value="Usado" /> Usado</label>
-                            <label><input type="radio" name="condicion" value="Reacondicionado" /> Reacondicionado</label>
-                        </fieldset>
-                        {erroresValidacion.condicion ? <span role="alert"><br />{erroresValidacion.condicion.join(' ')}</span> : null}
-                    </p>
+                    <fieldset disabled={cargando}>
+                        <legend>Condición del producto</legend>
+                        {["Nuevo", "Usado", "Reacondicionado"].map((condicion) => (
+                            <label key={condicion}>
+                                <input type="radio" name="condicion" value={condicion}
+                                    checked={formulario.condicion === condicion}
+                                    onChange={(evento) => setFormulario({ ...formulario, condicion: evento.target.value })} /> {condicion}
+                            </label>
+                        ))}
+                        {erroresValidacion.condicion && <span role="alert">{erroresValidacion.condicion.join(' ')}</span>}
+                    </fieldset>
                     <p>
                         <label>
                             Descripcion opcional <br />
@@ -400,8 +375,7 @@ export function EjemploCrudProductos() {
                                                 <div>{producto.descripcion || 'Sin descripción'}</div>
                                                 <div>Ingreso: {producto.fechaIngreso} · Etiquetas: {producto.etiquetas.join(', ') || 'Sin etiquetas'}</div>
                                             </td>
-                                            <td>{producto.precio}</td>
-                                            {producto.precio <= 100 && <span><strong>Producto en oferta!</strong></span>}
+                                            <td>{producto.precio} {producto.precio <= 100 && <strong>¡Producto en oferta!</strong>}</td>
                                             <td>{producto.cantidad}</td>
                                             <td>
                                                 <button className="button" type="button" disabled={cargando} onClick={() => editarProducto(producto)} >Editar</button>

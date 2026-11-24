@@ -1,9 +1,11 @@
-import { useParams, useSearchParams } from "react-router";
+import { Link, useParams, useSearchParams } from "react-router";
 import { cursos } from "./Cursos"
 
 export function DetalleCurso() {
 
+    // En /cursos/react, cursoId vale "react". El nombre cursoId viene del :cursoId que escribimos en App.
     const { cursoId } = useParams();
+    // Si agregas ?color=azul, get("color") devuelve "azul". Ese dato va después del signo ? y el curso sigue siendo el mismo.
     const [qParams] = useSearchParams();
 
     const color = qParams.get("color");
@@ -20,7 +22,7 @@ export function DetalleCurso() {
             <section>
                 <h1>Curso no encontrado</h1>
                 <p>No tenemos un curso con el identificador "{cursoId}"</p>
-                <a href="/cursos">Volver a los cursos</a>
+                <Link to="/cursos">Volver a los cursos</Link>
             </section>
         )
     }
@@ -32,7 +34,7 @@ export function DetalleCurso() {
             <header className="chapter-header">
                 <p className="eyebrow">Detalle del curso</p>
                 <h1>{titulo}</h1>
-                <p className="lead">Estos datos pertenecen al detalle de producto que se llama para llegar aca en la url</p>
+                <p className="lead">El último tramo de la URL indica qué curso estás viendo. Cambia <code>react</code> por <code>html-css</code> y compara los datos.</p>
             </header>
             <section className="card">
                 <p>Horario: {horario}</p>

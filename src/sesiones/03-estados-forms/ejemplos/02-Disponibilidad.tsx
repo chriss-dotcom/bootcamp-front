@@ -35,7 +35,7 @@ export function EjemploDisponibilidad() {
         })
     }
     return (
-        <section className="lesson" id="disponibilidad" aria-labelledby="contador-title">
+        <section className="lesson" id="disponibilidad" aria-labelledby="disponibilidad-title">
             <header className="lesson-heading">
                 <span className="lesson-number">02</span>
                 <h2 id="disponibilidad-title">Cambiar entre estados</h2>

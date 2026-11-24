@@ -8,14 +8,12 @@ function PreferenciaCurso({ curso }: PreferenciaCursoProps) {
 
     const [nivel, setNivel] = useState("Inicial")
 
-    // un useEffect con un segundo parametro en el arreglo ( useEffect( ()=>{}, [curso] ) ), significa que lo que esta en la funcion del
-    // primer parametro se ejecutara solo cuando 'curso' sea modificado.
+    // Guardamos el curso al montar el hijo y cada vez que el padre le pasa un curso distinto.
     useEffect(() => {
         localStorage.setItem('curso-seleccionado', curso)
     }, [curso])
 
-    // un useEffect con un segundo parametro en el arreglo ( useEffect( ()=>{}, [nivel] ) ), significa que lo que esta en la funcion del
-    // primer parametro se ejecutara solo cuando 'nivel' sea modificado.
+    // Este efecto también guarda el nivel inicial. Después, si solo cambia el nivel, se repite este efecto y el del curso queda igual.
     useEffect(() => {
         localStorage.setItem('nivel-seleccionado', nivel)
     }, [nivel])
@@ -55,7 +53,7 @@ export function EjemploDependencias() {
             <article className="card">
                 <p>
                     <label >
-                        Cuardo lo vamos a guardar en el estado del componente padre
+                        Elige un curso. El componente padre guarda tu selección.
                         <select value={curso} onChange={(evento) => setCurso(evento.target.value)}>
                             <option>React</option>
                             <option>JavaScript</option>

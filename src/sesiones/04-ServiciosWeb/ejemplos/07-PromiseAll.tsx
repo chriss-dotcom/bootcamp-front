@@ -52,7 +52,7 @@ export function EjemploPromiseAll() {
         <span className="lesson-number">07</span>
         <h2 id="promise-all-title">Esperar varias promesas con Promise.all</h2>
       </header>
-      <p><code>Promise.all</code> permite iniciar varias tareas al mismo tiempo y continuar cuando todas terminan.</p>
+      <p>Cada llamada a <code>ejecutarTarea</code> inicia una tarea. Con <code>Promise.all</code> esperamos los resultados de todas las promesas que guardamos en el arreglo.</p>
       <p>Las tareas terminan como <code>2 → 4 → 3 → 1</code>, pero el arreglo de resultados conserva el orden de las promesas: <code>1 → 2 → 3 → 4</code>.</p>
       <pre><code>{"const promesas = []\n\nfor (const tarea of tareas) {\n  const promesa = ejecutarTarea(tarea)\n  promesas.push(promesa)\n}\n\nPromise.all(promesas).then((resultados) => {\n  console.log(resultados)\n})"}</code></pre>
 

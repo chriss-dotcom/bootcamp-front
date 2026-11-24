@@ -7,6 +7,7 @@ function Temporizador() {
     useEffect(() => {
         //logica de montaje del componente
         const intervalo = setInterval(() => {
+            // Cada segundo React nos entrega el valor pendiente. Así el intervalo puede seguir sumando aunque se haya creado cuando segundos valía 0.
             setSegundos((valorActual) => {
                 return valorActual + 1
             })
@@ -16,6 +17,7 @@ function Temporizador() {
         // logica de desmontaje del componente
         return () => {
             console.log("desmontando el componente...")
+            // Detenemos el intervalo que creó este efecto. Si volvemos a montar el temporizador, quedará corriendo solo el nuevo.
             clearInterval(intervalo)
         }
     }, [])
