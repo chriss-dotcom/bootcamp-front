@@ -24,25 +24,6 @@ type EstadoCarrito = {
 export const useCarritoStore = create<EstadoCarrito>()(
     (set) => ({
         items: [],
-<<<<<<< HEAD
-        agregar: (producto) => set((estadoActual) => {
-
-            const existente = estadoActual.items.find((item) => item.producto.id === producto.id)
-            // si ya tienes todas las unidades disponibles (o no hay stock), no hace nada
-            if((existente?.cantidad ?? 0) >= producto.stock) return estadoActual
-
-            return {
-                items: existente?
-                //esta logica primero validara si el producto esta o no el el arreglo de items[]
-                estadoActual.items.map((item) =>
-                   
-                //estadoActual.items.some((item) => item.producto.id === producto.id)
-                   // ?// conseguir el arreglo de items[] actualizado
-                    // esta logica solo se preocupa de actualizar las cantidades unicamente
-                    // si el producto ya existe en el arreglo
-                   // estadoActual.items.map((item) => item.producto.id === producto.id
-                   item.producto.id === producto.id
-=======
         agregar: (producto) => set((estadoActual) => ({
             items:
                 //esta logica primero validara si el producto esta o no el el arreglo de items[]
@@ -51,7 +32,6 @@ export const useCarritoStore = create<EstadoCarrito>()(
                     // esta logica solo se preocupa de actualizar las cantidades unicamente
                     // si el producto ya existe en el arreglo
                     estadoActual.items.map((item) => item.producto.id === producto.id
->>>>>>> upstream/main
                         // tratar la posicion de arreglo de items de forma individual si existe
                         ? { ...item, cantidad: item.cantidad + 1 }
                         : //esto pasa si no es igual el id
@@ -61,14 +41,8 @@ export const useCarritoStore = create<EstadoCarrito>()(
                     [...estadoActual.items, { producto: producto, cantidad: 1 }]
             // Esta forma no sirve por que repite los productos y los marca siempre con cantidad 1
             //[...estadoActual.items, { producto: producto, cantidad: 1 }]
-<<<<<<< HEAD
-            }
-            
-        }),
-=======
         })),
         // Si quedan dos unidades, map deja una. Si quedaba una, filter saca del carrito la línea que llegó a cero.
->>>>>>> upstream/main
         quitar: (id) => set((estadoActual) => ({
             items: estadoActual.items.map(
                 (item) => item.producto.id === id ? { ...item, cantidad: item.cantidad - 1 } : item
